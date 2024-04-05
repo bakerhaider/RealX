@@ -3,7 +3,9 @@ import { mutation, query } from './_generated/server';
 
 export const createFile = mutation({
   args: {
-    name: v.string(),
+    username: v.string(),
+    content: v.string(),
+    photoUrl: v.optional(v.string()),
   },
   async handler(ctx, args) {
     const identity = await ctx.auth.getUserIdentity();
@@ -11,7 +13,9 @@ export const createFile = mutation({
       throw new ConvexError('no auth');
     }
     await ctx.db.insert('files', {
-      name: args.name,
+      username: args.username,
+      content: args.content,
+      photoUrl: args.photoUrl,
     });
   },
 });
