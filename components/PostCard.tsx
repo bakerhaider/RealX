@@ -35,7 +35,20 @@ const PostCard = () => {
                   </div>
                   <div className="text-gray-500 dark:text-gray-400">
                     {' '}
-                    {data?._creationTime}{' '}
+                    {data && data._creationTime && (
+                      <span>
+                        {new Date(data._creationTime).toLocaleString(
+                          undefined,
+                          {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: 'numeric',
+                          }
+                        )}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <p className="text-base leading-snug">{data?.content}</p>

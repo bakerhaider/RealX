@@ -1,8 +1,12 @@
-'use client';
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import {
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+} from '@clerk/nextjs';
 import React from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,27 +16,56 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
-import { createFile } from '@/convex/files';
+import { createFile as createFileMutation } from '@/convex/files'; // Renamed
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-
-const onSubmit = (e: any) => {
-  e.preventDefault();
-  try {
-    const res = axios.post;
-  } catch (error) {}
-};
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from './ui/use-toast';
 
 export function DialogDemo() {
-  async function onSubmit() {
+  const sesh = useUser();
+  const user = sesh;
+  console.log(user);
+  const { toast } = useToast();
+
+  const formSchema = z.object({
+    content: z.string().min(2, {
+      message: 'content must be at least 2 characters.',
+    }),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      content: '',
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await createFile({
-        username: 'eee',
-        content: 'eee',
-        photoUrl: 'eee',
+        username: user?.user?.username ?? '',
+        content: values.content, // Fixed
+        photoUrl: user?.user?.imageUrl,
+      });
+      form.reset();
+      toast({
+        title: 'Posted!',
       });
     } catch (error) {}
   }
@@ -44,50 +77,32 @@ export function DialogDemo() {
         <Button variant="outline">Edit Profile</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
-          <DialogDescription>
-            Make changes to your profile here. Click save when youre done.
-          </DialogDescription>
-        </DialogHeader>
-        <form action="">
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="name"
-                className="text-right"
-              >
-                Name
-              </Label>
-              <Input
-                id="name"
-                defaultValue="Pedro Duarte"
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="username"
-                className="text-right"
-              >
-                Username
-              </Label>
-              <Input
-                id="username"
-                defaultValue="@peduarte"
-                className="col-span-3"
-              />
-            </div>
-          </div>
-        </form>
-        <DialogFooter>
-          <Button
-            type="submit"
-            onClick={onSubmit}
+        <DialogHeader></DialogHeader>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8"
           >
-            Save changes
-          </Button>
-        </DialogFooter>
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Content</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter content"
+                      {...field}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
@@ -95,22 +110,24 @@ export function DialogDemo() {
 
 const Header = () => {
   return (
-    <nav className="bg-gray-800 text-center text-black">
+    <nav className="bg-gray-800 text-white">
+      {' '}
+      {/* Changed text color */}
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            <DialogDemo />
+            <SignedIn>
+              <DialogDemo />
+            </SignedIn>
             <div className="sm:ml-6 flex justify-center">
               <div className="flex space-x-4">
                 <SignedOut>
-                  {' '}
                   <Link
                     href={'/sign-in'}
                     className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
                   >
-                    {' '}
                     Sign in
-                  </Link>{' '}
+                  </Link>
                 </SignedOut>
                 <SignedIn>
                   <UserButton />

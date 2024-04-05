@@ -23,6 +23,6 @@ export const createFile = mutation({
 export const getFiles = query({
   args: {},
   async handler(ctx, args) {
-    return ctx.db.query('files').collect();
+    return await ctx.db.query('files').order('desc').collect();
   },
 });
