@@ -21,7 +21,7 @@ const PostCard = () => {
                   <AvatarImage
                     width={48}
                     height={48}
-                    src="https://github.com/shadcn.png"
+                    src={data?.photoUrl}
                     alt="@shadcn"
                   />
                   <AvatarFallback>CN</AvatarFallback>
