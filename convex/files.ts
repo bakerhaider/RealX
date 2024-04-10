@@ -6,6 +6,9 @@ export const createFile = mutation({
     username: v.string(),
     content: v.string(),
     photoUrl: v.optional(v.string()),
+    storageId: v.id('_storage'),
+    author: v.string(),
+    body: v.string(),
   },
   async handler(ctx, args) {
     const identity = await ctx.auth.getUserIdentity();

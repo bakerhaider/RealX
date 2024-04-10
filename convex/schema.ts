@@ -7,4 +7,14 @@ export default defineSchema({
     content: v.string(),
     photoUrl: v.optional(v.string()),
   }),
+  messages: defineTable({
+    author: v.string(),
+    body: v.id('_storage'),
+    format: v.string(),
+    content: v.string(),
+  }),
+  images: defineTable({
+    storageId: v.id('_storage'),
+    prompt: v.string(),
+  }),
 });
