@@ -24,11 +24,13 @@ export function DialogDemo() {
   const sesh = useUser();
   const [content, setContent] = useState('');
   const { toast } = useToast();
+  const [subbmitting, setSubbmitting] = useState(false);
 
   async function handleSendImage(event: FormEvent) {
     event.preventDefault();
 
     if (selectedImage) {
+      setSubbmitting(true);
       const postUrl = await generateUploadUrl();
       const result = await fetch(postUrl, {
         method: 'POST',
@@ -46,6 +48,7 @@ export function DialogDemo() {
       setSelectedImage(null);
       setContent('');
       imageInput.current!.value = '';
+      setSubbmitting(false);
     } else {
       console.log('No image selected');
     }
@@ -84,7 +87,12 @@ export function DialogDemo() {
             disabled={selectedImage !== null}
           />
 
-          <Button type="submit">Submit</Button>
+          <Button
+            type="submit"
+            disabled={subbmitting}
+          >
+            Submit
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
