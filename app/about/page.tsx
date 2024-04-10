@@ -45,11 +45,6 @@ export default function App() {
           key={m?._id}
         >
           <div className="flex items-center">
-            <img
-              src="https://via.placeholder.com/48"
-              alt="Profile Picture"
-              className="h-12 w-12 rounded-full mr-3"
-            />
             <div>
               <h2 className="text-lg font-bold"> {m?.author} </h2>
               <p className="text-gray-600">@{m?.author}</p>

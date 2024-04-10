@@ -9,7 +9,7 @@ export default defineSchema({
   }),
   messages: defineTable({
     author: v.string(),
-    body: v.id('_storage'),
+    body: v.optional(v.id('_storage')),
     format: v.string(),
     content: v.string(),
   }),

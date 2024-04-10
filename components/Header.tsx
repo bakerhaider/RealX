@@ -5,7 +5,7 @@ import {
   UserButton,
   useUser,
 } from '@clerk/nextjs';
-import React from 'react';
+import React, { FormEvent, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   Dialog,
@@ -19,7 +19,7 @@ import {
 import { Label } from '@/components/ui/label';
 import axios from 'axios';
 import { createFile as createFileMutation } from '@/convex/files'; // Renamed
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,73 +36,80 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from './ui/use-toast';
+import { Textarea } from './ui/textarea';
 
 export function DialogDemo() {
+  const generateUploadUrl = useMutation(api.messages.generateUploadUrl);
+  const sendImage = useMutation(api.messages.sendImage);
+  const imageInput = useRef<HTMLInputElement>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const sesh = useUser();
-  const user = sesh;
-  console.log(user);
+  const [content, setContent] = useState('');
   const { toast } = useToast();
 
-  const formSchema = z.object({
-    content: z.string().min(2, {
-      message: 'content must be at least 2 characters.',
-    }),
-  });
+  async function handleSendImage(event: FormEvent) {
+    event.preventDefault();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      content: '',
-    },
-  });
+    // Check if an image is selected
+    if (selectedImage) {
+      const postUrl = await generateUploadUrl();
+      const result = await fetch(postUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': selectedImage.type,
+        },
+        body: selectedImage,
+      });
+      const { storageId } = await result.json();
+      await sendImage({
+        storageId,
+        author: (sesh?.user?.username as string) || '',
+        content,
+      });
+      setSelectedImage(null);
+      setContent('');
+      imageInput.current!.value = '';
+    } else {
+      // Handle the case when no image is selected
+      console.log('No image selected');
+    }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await createFile({
-        username: user?.user?.username ?? '',
-        content: values.content, // Fixed
-        photoUrl: user?.user?.imageUrl,
-      });
-      form.reset();
-      toast({
-        title: 'Posted!',
-      });
-    } catch (error) {}
+    toast({
+      title: 'Posted!',
+    });
   }
 
-  const createFile = useMutation(api.files.createFile);
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">Edit Profile</Button>
+      <DialogTrigger
+        asChild
+        className="text-black"
+      >
+        <Button variant="outline">Make a post</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader></DialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8"
-          >
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Content</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter content"
-                      {...field}
-                    />
-                  </FormControl>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">Submit</Button>
-          </form>
-        </Form>
+        <form
+          onSubmit={handleSendImage}
+          className="space-y-8"
+        >
+          <Textarea
+            placeholder="Type your message here."
+            value={content}
+            onChange={(event) => setContent(event.target.value)}
+          />
+          <Input
+            type="file"
+            accept="image/*"
+            required
+            ref={imageInput}
+            onChange={(event) => setSelectedImage(event.target.files![0])}
+            disabled={selectedImage !== null}
+          />
+
+          <Button type="submit">Submit</Button>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -111,8 +118,6 @@ export function DialogDemo() {
 const Header = () => {
   return (
     <nav className="bg-gray-800 text-white">
-      {' '}
-      {/* Changed text color */}
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
