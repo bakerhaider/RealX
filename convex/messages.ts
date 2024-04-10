@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server';
 import { action, internalMutation, mutation, query } from './_generated/server';
 import { ConvexError, v } from 'convex/values';
 
@@ -7,7 +8,7 @@ export const generateUploadUrl = mutation(async (ctx) => {
 
 export const sendImage = mutation({
   args: {
-    storageId: v.optional(v.id('_storage')),
+    storageId: v.id('_storage'),
     author: v.string(),
     content: v.string(),
   },
