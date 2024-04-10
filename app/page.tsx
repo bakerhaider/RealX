@@ -1,16 +1,16 @@
-'use client';
 import Header from '@/components/Header';
+import Loading from '@/components/Loading';
 import PostCard from '@/components/PostCard';
-import { api } from '@/convex/_generated/api';
-import { useMutation, useQuery } from 'convex/react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Suspense } from 'react';
 
-export default function Home() {
-  const onClick = useMutation(api.files.createFile);
-  const getFiles = useQuery(api.files.getFiles);
+export default async function Home() {
   return (
-    <main className=" bg-black text-white">
-      <Header />
-      <PostCard />
+    <main className=" bg-black text-white h-full">
+      <Suspense fallback={<Loading />}>
+        <Header />
+        <PostCard />
+      </Suspense>
     </main>
   );
 }

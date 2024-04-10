@@ -1,19 +1,11 @@
+'use client';
 /* eslint-disable @next/next/no-img-element */
-import React, { useRef, useState } from 'react';
 import { Card } from './ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { useMutation, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useUser } from '@clerk/nextjs';
 
 const PostCard = () => {
-  const generateUploadUrl = useMutation(api.messages.generateUploadUrl);
-  const sendImage = useMutation(api.messages.sendImage);
-  const imageInput = useRef<HTMLInputElement>(null);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const sesh = useUser();
   const messages = useQuery(api.listMessages.list);
-  const [content, setContent] = useState('');
 
   return (
     <article className="flex items-start p-2 border-neutral-50 flex-col space-y-3">
