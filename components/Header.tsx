@@ -1,40 +1,17 @@
 'use client';
-import {
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-  useUser,
-} from '@clerk/nextjs';
+import { SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 import React, { FormEvent, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import axios from 'axios';
-import { createFile as createFileMutation } from '@/convex/files'; // Renamed
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from './ui/use-toast';
 import { Textarea } from './ui/textarea';
@@ -51,7 +28,6 @@ export function DialogDemo() {
   async function handleSendImage(event: FormEvent) {
     event.preventDefault();
 
-    // Check if an image is selected
     if (selectedImage) {
       const postUrl = await generateUploadUrl();
       const result = await fetch(postUrl, {
@@ -71,7 +47,6 @@ export function DialogDemo() {
       setContent('');
       imageInput.current!.value = '';
     } else {
-      // Handle the case when no image is selected
       console.log('No image selected');
     }
 
@@ -121,7 +96,7 @@ const Header = () => {
     <nav className="bg-gray-800 text-white">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
-          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+          <div className="flex flex-1 items-center justify-center sm:items-stretch  gap-4">
             <SignedIn>
               <DialogDemo />
             </SignedIn>
